@@ -5,6 +5,10 @@ const getAllFrinedshipsById = async (userId) => {
   //creating a variable to handle query to database
   const query = `SELECT 
     CASE 
+        WHEN f.user_id1 = $1 THEN u2.id
+        WHEN f.user_id2 = $1 THEN u1.id
+    END AS friend_id,
+    CASE 
         WHEN f.user_id1 = $1 THEN u2.username
         WHEN f.user_id2 = $1 THEN u1.username
     END AS friend_username,
@@ -67,10 +71,34 @@ const getUserFriendsPosts = async (userId) => {
   return result;
 };
 
+//defining async function to use in app, with passed in variables
+const getAllNonFriends = async (userId) => {
+  //creating a variable to handle query to database
+  const query = `SELECT u.username, u.id
+    FROM users u
+    WHERE u.id != $1 
+      AND u.id NOT IN (
+        SELECT 
+          CASE 
+            WHEN f.user_id1 = $1 THEN f.user_id2
+            WHEN f.user_id2 = $1 THEN f.user_id1
+          END AS friend_id
+        FROM friendships f
+        WHERE f.user_id1 = $1 OR f.user_id2 = $1
+  );`;
+
+  //sending query to database, creating variable for results
+  const result = await pool.query(query, [userId]);
+
+  //return result to use in app
+  return result;
+};
+
 //export function to use else where
 module.exports = {
   getAllFrinedshipsById,
   getUserPosts,
   getUser,
   getUserFriendsPosts,
+  getAllNonFriends,
 };
