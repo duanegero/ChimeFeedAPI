@@ -1,0 +1,29 @@
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    age INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE friendships (
+    id SERIAL PRIMARY KEY,
+    user_id1 INT NOT NULL REFERENCES users(id),
+    user_id2 INT NOT NULL REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id1, user_id2),
+    CHECK (user_id1 < user_id2)
+);
+
+INSERT INTO friendships (user_id1, user_id2)
+VALUES (LEAST(3,1), GREATEST(3,1))
+RETURNING *;
+
+CREATE TABLE posts (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id),
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
