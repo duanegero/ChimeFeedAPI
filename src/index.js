@@ -8,6 +8,7 @@ const loginRoute = require("./routes/login");
 const friendshipsRoute = require("./routes/friendships");
 const postsRoute = require("./routes/posts");
 const usersRoute = require("./routes/users");
+const postLikesRoute = require("./routes/postLikes");
 
 app.use(express.json()); //middleware to parse and handle json
 app.use(cors()); //enable cors for all routes
@@ -17,6 +18,7 @@ app.use("/login", loginRoute);
 app.use("/friendships", friendshipsRoute);
 app.use("/posts", postsRoute);
 app.use("/users", usersRoute);
+app.use("/post-likes", postLikesRoute);
 
 app.get("/", (req, res) => {
   res.send("Welcome To ChimeFeed API");

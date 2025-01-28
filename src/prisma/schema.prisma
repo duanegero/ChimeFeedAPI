@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model friendships {
+  id                                Int       @id @default(autoincrement())
+  user_id1                          Int
+  user_id2                          Int
+  created_at                        DateTime? @default(now()) @db.Timestamp(6)
+  users_friendships_user_id1Tousers users     @relation("friendships_user_id1Tousers", fields: [user_id1], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_friendships_user_id2Tousers users     @relation("friendships_user_id2Tousers", fields: [user_id2], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([user_id1, user_id2])
+}
+
+model post_likes {
+  id         Int       @id @default(autoincrement())
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  user_id    Int
+  post_id    Int
+  posts      posts     @relation(fields: [post_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users      users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([user_id, post_id], map: "unique_user_post")
+}
+
+model posts {
+  id         Int          @id @default(autoincrement())
+  user_id    Int
+  content    String
+  created_at DateTime?    @default(now()) @db.Timestamp(6)
+  post_likes post_likes[]
+  users      users        @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id                                      Int           @id @default(autoincrement())
+  username                                String        @unique @db.VarChar(50)
+  password                                String        @db.VarChar(255)
+  first_name                              String        @db.VarChar(50)
+  last_name                               String        @db.VarChar(50)
+  age                                     Int
+  created_at                              DateTime?     @default(now()) @db.Timestamp(6)
+  friendships_friendships_user_id1Tousers friendships[] @relation("friendships_user_id1Tousers")
+  friendships_friendships_user_id2Tousers friendships[] @relation("friendships_user_id2Tousers")
+  post_likes                              post_likes[]
+  posts                                   posts[]
+}

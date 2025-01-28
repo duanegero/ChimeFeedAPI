@@ -6,7 +6,7 @@ const pool = new Pool({
   user: "duane",
   host: "localhost",
   database: "ChimeFeed",
-  password: "postgrespass",
+  password: "password",
   port: 5432,
 });
 

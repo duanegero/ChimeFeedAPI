@@ -50,9 +50,34 @@ const makeNewUser = async (username, password, firstname, lastname, age) => {
   return result;
 };
 
+const makeNewPostLike = async (userId, postId) => {
+  const query = `INSERT INTO post_likes(user_id, post_id)
+  VALUES($1, $2)
+  RETURNING *;`;
+
+  const result = await pool.query(query, [userId, postId]);
+
+  return result;
+};
+
+const checkIfUserLikedPost = async (userId, postId) => {
+  try {
+    const query = `SELECT 1 FROM post_likes WHERE user_id = $1 AND post_id = $2;`;
+
+    const result = await pool.query(query, [userId, postId]);
+
+    return result.rows.length > 0;
+  } catch (error) {
+    console.error("Error checking if user like the post", error.message);
+    throw error;
+  }
+};
+
 //export function to use else where
 module.exports = {
   makeNewFriendship,
   makeNewPost,
   makeNewUser,
+  makeNewPostLike,
+  checkIfUserLikedPost,
 };

@@ -94,6 +94,25 @@ const getAllNonFriends = async (userId) => {
   return result;
 };
 
+const getPostLikes = async (postId) => {
+  const query = ` SELECT 
+      users.username, 
+      post_likes.post_id, 
+      post_likes.created_at 
+    FROM 
+      post_likes
+    JOIN 
+      users
+    ON 
+      post_likes.user_id = users.id
+    WHERE 
+      post_likes.post_id = $1;`;
+
+  const result = await pool.query(query, [postId]);
+
+  return result;
+};
+
 //export function to use else where
 module.exports = {
   getAllFrinedshipsById,
@@ -101,4 +120,5 @@ module.exports = {
   getUser,
   getUserFriendsPosts,
   getAllNonFriends,
+  getPostLikes,
 };
