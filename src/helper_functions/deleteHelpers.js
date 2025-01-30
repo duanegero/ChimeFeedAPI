@@ -1,48 +1,70 @@
-const pool = require("../db"); //creating varible used to connect to database
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 
 //defining async function to use in app, with passed in variables
 const deleteUser = async (userId) => {
-  //creating a variable to handle query to database
-  const query = `DELETE FROM users
-    WHERE id = $1
-    RETURNING *;`;
+  const userToDelele = await prisma.users.findUnique({
+    where: {
+      id: userId,
+    },
+  });
 
-  //sending query to database, creating variable for results
-  const result = await pool.query(query, [userId]);
+  if (!userToDelele) {
+    throw new Error("User not found");
+  }
 
-  //return result to use in app
-  return result;
+  //Delete related frinedships
+  await prisma.friendships.deleteMany({
+    where: {
+      OR: [{ user_id1: userId }, { user_id2: userId }],
+    },
+  });
+
+  // Delete the related post_likes records first
+  await prisma.post_likes.deleteMany({
+    where: {
+      user_id: userId, // Delete all likes by the user
+    },
+  });
+
+  await prisma.users.delete({
+    where: {
+      id: userId,
+    },
+  });
+
+  return userToDelele;
 };
 
 //defining async function to use in app, with passed in variables
 const deletePost = async (postId) => {
   //creating a variable to handle query to database
-  const query = `DELETE FROM posts
-    WHERE id = $1
-    RETURNING *;`;
+  const postToDelete = await prisma.posts.delete({
+    where: {
+      id: postId,
+    },
+  });
 
-  //sending query to database, creating variable for results
-  const result = await pool.query(query, [postId]);
-
-  //return result to use in app
-  return result;
+  return postToDelete;
 };
 
 //defining async function to use in app, with passed in variables
-const deleteFriendship = async (user_id1, user_id2) => {
+const deleteFriendship = async (user_Id1, user_Id2) => {
   //creating a variable to handle query to database
-  const query = `DELETE FROM friendships
-  WHERE 
-  (user_id1 = $1 AND user_id2 = $2)
-  OR
-  (user_id1 = $2 AND user_id2 = $1)
-  RETURNING *`;
 
-  //sending query to database, creating variable for results
-  const result = await pool.query(query, [user_id1, user_id2]);
+  const user1 = parseInt(user_Id1, 10);
+  const user2 = parseInt(user_Id2, 10);
 
-  //return result to use in app
-  return result;
+  const friendshipToDelete = await prisma.friendships.deleteMany({
+    where: {
+      OR: [
+        { user_id1: user1, user_id2: user2 },
+        { user_id1: user2, user_id2: user1 },
+      ],
+    },
+  });
+
+  return friendshipToDelete;
 };
 
 //export function to use else where

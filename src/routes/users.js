@@ -144,17 +144,14 @@ router.delete("/:id", async (req, res) => {
 
   try {
     //create varible to handle query from helper function, pass in variable
-    const result = await deleteUser(userId);
+    const userToDelete = await deleteUser(userId);
 
     //if nothing found return message
-    if (result.rows.length === 0) {
+    if (!userToDelete) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    //vaiable to handle results
-    const deletedUser = result.rows[0];
-    //return ok status and json results
-    res.status(200).json({ message: "User deleted.", deletedUser });
+    res.status(200).json({ message: "User deleted.", userToDelete });
   } catch (error) {
     //log detailed error for debugging
     console.error(

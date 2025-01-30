@@ -160,15 +160,11 @@ router.delete("/:id", async (req, res) => {
 
   try {
     //create varible to handle query from helper function, pass in variable
-    const result = await deletePost(postId);
+    const postToDelete = await deletePost(postId);
 
-    //if nothing found return status with json
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: "Post not found." });
-    }
-
-    //return ok status and json results
-    res.status(200).json({ message: "Post deleted successfully." });
+    res
+      .status(200)
+      .json({ message: "Post deleted successfully.", postToDelete });
   } catch (error) {
     //log detailed error for debugging
     console.error(

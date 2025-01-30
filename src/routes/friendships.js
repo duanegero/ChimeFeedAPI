@@ -98,18 +98,17 @@ router.delete("/", async (req, res) => {
   }
   try {
     //create varible to handle query from helper function, pass in variable
-    const result = await deleteFriendship(user_id1, user_id2);
+    const friendshipToDelete = await deleteFriendship(user_id1, user_id2);
 
-    //if nothing found return message
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: "Frinedship not found." });
+    if (!friendshipToDelete) {
+      console.log("Unable to delete frinedship.");
+      return;
     }
 
-    //vaiable to handle results
-    const deletedFriendship = result.rows[0];
-
     //return ok status and json results
-    res.status(200).json({ message: "Friendship deleted.", deletedFriendship });
+    res
+      .status(200)
+      .json({ message: "Friendship deleted.", friendshipToDelete });
   } catch (error) {
     //log detailed error for debugging
     console.error(
