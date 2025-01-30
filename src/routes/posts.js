@@ -61,16 +61,7 @@ router.get("/:id", async (req, res) => {
     //create varible to handle query from helper function, pass in variable
     const result = await getUserPosts(userId);
 
-    //vaiable to handle results
-    const userPosts = result.rows;
-
-    //if nothing found return message
-    if (!userPosts) {
-      return res.status(500).json({ message: "Unable to fetch posts." });
-    }
-
-    //return ok status and json results
-    res.status(200).json(result.rows);
+    res.status(200).json(result);
   } catch (error) {
     //log detailed error for debugging
     console.error(
@@ -93,20 +84,17 @@ router.get("/:id/friends-posts", async (req, res) => {
 
   try {
     //create varible to handle query from helper function, pass in variable
-    const result = await getUserFriendsPosts(userId);
-
-    //vaiable to handle results
-    const friendsPosts = result.rows;
+    const posts = await getUserFriendsPosts(userId);
 
     //if nothing found return message
-    if (!friendsPosts) {
+    if (!posts) {
       return res
         .status(500)
         .json({ message: "Unable to fetch frineds posts." });
     }
 
     //return ok status and json results
-    res.status(200).json(result.rows);
+    res.status(200).json(posts);
   } catch (error) {
     //log detailed error for debugging
     console.error(

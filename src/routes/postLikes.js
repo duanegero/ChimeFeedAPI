@@ -54,15 +54,13 @@ router.get("/:id", async (req, res) => {
   const postId = parseInt(req.params.id);
 
   try {
-    const result = await getPostLikes(postId);
-
-    const postLikes = result.rows;
+    const postLikes = await getPostLikes(postId);
 
     if (!postLikes) {
       return res.status(500).json({ message: "unable to fetch post likes." });
     }
 
-    res.status(200).json(result.rows);
+    res.status(200).json(postLikes);
   } catch (error) {
     //log detailed error for debugging
     console.error(

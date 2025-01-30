@@ -1,116 +1,161 @@
 const pool = require("../db"); //creating varible used to connect to database
 
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
+
 //defining async function to use in app, with passed in variables
 const getAllFrinedshipsById = async (userId) => {
   //creating a variable to handle query to database
-  const query = `SELECT 
-    CASE 
-        WHEN f.user_id1 = $1 THEN u2.id
-        WHEN f.user_id2 = $1 THEN u1.id
-    END AS friend_id,
-    CASE 
-        WHEN f.user_id1 = $1 THEN u2.username
-        WHEN f.user_id2 = $1 THEN u1.username
-    END AS friend_username,
-    f.created_at
-FROM friendships f
-JOIN users u1 ON f.user_id1 = u1.id
-JOIN users u2 ON f.user_id2 = u2.id
-WHERE f.user_id1 = $1 OR f.user_id2 = $1;`;
 
-  //sending query to database, creating variable for results
-  const result = await pool.query(query, [userId]);
+  const friendships = await prisma.friendships.findMany({
+    where: {
+      OR: [
+        { user_id1: userId }, // User is `user_id1`
+        { user_id2: userId }, // User is `user_id2`
+      ],
+    },
+    include: {
+      users_friendships_user_id1Tousers: {
+        // Relation to `user_id1`
+        select: {
+          id: true,
+          username: true,
+        },
+      },
+      users_friendships_user_id2Tousers: {
+        // Relation to `user_id2`
+        select: {
+          id: true,
+          username: true,
+        },
+      },
+    },
+  });
+  const friends = friendships.map((friendship) => {
+    const isUser1 = friendship.user_id1 === userId;
 
-  //return result to use in app
-  return result;
+    return {
+      friend_id: isUser1
+        ? friendship.users_friendships_user_id2Tousers.id
+        : friendship.users_friendships_user_id1Tousers.id,
+      friend_username: isUser1
+        ? friendship.users_friendships_user_id2Tousers.username
+        : friendship.users_friendships_user_id1Tousers.username,
+      created_at: friendship.created_at,
+    };
+  });
+
+  return friends;
 };
 
 //defining async function to use in app, with passed in variables
 const getUserPosts = async (userId) => {
-  //creating a variable to handle query to database
-  const query = `SELECT * 
-    FROM posts
-    WHERE user_id = $1
-    ORDER BY created_at DESC`;
+  const posts = await prisma.posts.findMany({
+    where: { user_id: userId },
+    orderBy: { created_at: "desc" },
+  });
 
-  //sending query to database, creating variable for results
-  const result = await pool.query(query, [userId]);
-
-  //return result to use in app
-  return result;
+  return posts;
 };
 
 //defining async function to use in app, with passed in variables
 const getUser = async (userId) => {
   //creating a variable to handle query to database
-  const query = `SELECT * FROM users
-    WHERE id = $1`;
+  const user = await prisma.users.findUnique({
+    where: { id: Number(userId) },
+  });
 
-  //sending query to database, creating variable for results
-  const result = await pool.query(query, [userId]);
-
-  //return result to use in app
-  return result;
+  return user;
 };
 
 //defining async function to use in app, with passed in variables
 const getUserFriendsPosts = async (userId) => {
   //creating a variable to handle query to database
-  const query = `SELECT posts.id, posts.content, posts.created_at, users.username
-    FROM posts
-    JOIN users ON posts.user_id = users.id
-    JOIN friendships f ON (f.user_id1 = posts.user_id AND f.user_id2 = $1)
-                     OR (f.user_id2 = posts.user_id AND f.user_id1 = $1)
-    WHERE f.user_id1 = $1 OR f.user_id2 = $1
-    ORDER BY posts.created_at DESC;`;
 
-  //sending query to database, creating variable for results
-  const result = await pool.query(query, [userId]);
+  const posts = await prisma.posts.findMany({
+    where: {
+      OR: [
+        {
+          users: {
+            friendships_friendships_user_id1Tousers: {
+              some: { user_id2: userId },
+            },
+          },
+        }, // User is user_id1 in friendship
+        {
+          users: {
+            friendships_friendships_user_id2Tousers: {
+              some: { user_id1: userId },
+            },
+          },
+        }, // User is user_id2 in friendship
+      ],
+    },
+    include: {
+      users: {
+        select: {
+          username: true,
+        },
+      },
+    },
+    orderBy: {
+      created_at: "desc",
+    },
+  });
 
   //return result to use in app
-  return result;
+  return posts;
 };
 
 //defining async function to use in app, with passed in variables
 const getAllNonFriends = async (userId) => {
   //creating a variable to handle query to database
-  const query = `SELECT u.username, u.id
-    FROM users u
-    WHERE u.id != $1 
-      AND u.id NOT IN (
-        SELECT 
-          CASE 
-            WHEN f.user_id1 = $1 THEN f.user_id2
-            WHEN f.user_id2 = $1 THEN f.user_id1
-          END AS friend_id
-        FROM friendships f
-        WHERE f.user_id1 = $1 OR f.user_id2 = $1
-  );`;
+  const users = await prisma.users.findMany({
+    where: {
+      NOT: { id: userId }, // Exclude the user with the given `userId`
+      AND: {
+        NOT: {
+          friendships_friendships_user_id1Tousers: {
+            some: { user_id2: userId }, // Exclude friends where `user_id2` is the provided `userId`
+          },
+        },
+        NOT: {
+          friendships_friendships_user_id2Tousers: {
+            some: { user_id1: userId }, // Exclude friends where `user_id1` is the provided `userId`
+          },
+        },
+      },
+    },
+    select: {
+      id: true,
+      username: true,
+    },
+  });
 
-  //sending query to database, creating variable for results
-  const result = await pool.query(query, [userId]);
-
-  //return result to use in app
-  return result;
+  return users;
 };
 
 const getPostLikes = async (postId) => {
-  const query = ` SELECT 
-      users.username, 
-      post_likes.post_id, 
-      post_likes.created_at 
-    FROM 
-      post_likes
-    JOIN 
-      users
-    ON 
-      post_likes.user_id = users.id
-    WHERE 
-      post_likes.post_id = $1;`;
+  const postLikes = await prisma.post_likes.findMany({
+    where: {
+      post_id: postId,
+    },
+    select: {
+      created_at: true,
+      post_id: true,
+      users: {
+        select: {
+          username: true,
+        },
+      },
+    },
+  });
 
-  const result = await pool.query(query, [postId]);
-
-  return result;
+  return postLikes.map((like) => ({
+    username: like.users.username,
+    post_id: like.post_id,
+    created_at: like.created_at,
+  }));
 };
 
 //export function to use else where

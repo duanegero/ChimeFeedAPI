@@ -14,10 +14,7 @@ router.get("/:id", async (req, res) => {
 
   try {
     //create varible to handle query from helper function, pass in variable
-    const result = await getUser(userId);
-
-    //vaiable to handle results
-    const user = result.rows[0];
+    const user = await getUser(userId);
 
     //if nothing found return message
     if (!user) {

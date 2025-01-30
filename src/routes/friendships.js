@@ -16,18 +16,15 @@ router.get("/:id", async (req, res) => {
 
   try {
     //create varible to handle query from helper function, pass in variable
-    const result = await getAllFrinedshipsById(userId);
-
-    //vaiable to handle results
-    const friendships = result.rows;
+    const friends = await getAllFrinedshipsById(userId);
 
     //if nothing found return message
-    if (!friendships) {
+    if (!friends) {
       return res.status(500).json({ message: "Unable to fetch friendships." });
     }
 
     //return ok status and json results
-    res.status(200).json(result.rows);
+    res.status(200).json(friends);
   } catch (error) {
     //log detailed error for debugging
     console.error(
@@ -136,10 +133,10 @@ router.get("/:id/find-friends", async (req, res) => {
 
   try {
     //create varible to handle query from helper function, pass in variable
-    const result = await getAllNonFriends(userId);
+    const users = await getAllNonFriends(userId);
 
     //return ok status and json results
-    res.status(200).json(result.rows);
+    res.status(200).json(users);
   } catch (error) {
     //log detailed error for debugging
     console.error(
