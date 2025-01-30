@@ -1,72 +1,87 @@
-const pool = require("../db"); //creating varible used to connect to database
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 
 //defining async function to use in app, with passed in variables
 const makeNewFriendship = async (userId, selectedUserId) => {
+  const user1 = Math.min(userId, selectedUserId);
+  const user2 = Math.max(userId, selectedUserId);
+
   //creating a variable to handle query to database
-  const query = `INSERT INTO friendships (user_id1, user_id2)
-    VALUES (LEAST($1::int, $2::int), GREATEST($1::int, $2::int))
-    RETURNING *;`;
 
-  //sending query to database, creating variable for results
-  const result = await pool.query(query, [userId, selectedUserId]);
+  const newFriendship = await prisma.friendships.create({
+    data: {
+      user_id1: user1,
+      user_id2: user2,
+    },
+  });
 
-  //return result to use in app
-  return result;
+  // //return result to use in app
+  return newFriendship;
 };
 
 //defining async function to use in app, with passed in variables
 const makeNewPost = async (userId, content) => {
   //creating a variable to handle query to database
-  const query = `
-      INSERT INTO posts (user_id, content)
-      VALUES ($1, $2)
-      RETURNING *;
-    `;
-
-  //sending query to database, creating variable for results
-  const result = await pool.query(query, [userId, content]);
+  const newPost = await prisma.posts.create({
+    data: {
+      user_id: userId,
+      content: content,
+    },
+  });
 
   //return result to use in app
-  return result;
+  return newPost;
 };
 
 //defining async function to use in app, with passed in variables
 const makeNewUser = async (username, password, firstname, lastname, age) => {
   //creating a variable to handle query to database
-  const query = `INSERT INTO users (username, password, first_name, last_name, age)
-    VALUES ($1, $2, $3, $4, $5)
-    RETURNING *;`;
 
-  //sending query to database, creating variable for results
-  const result = await pool.query(query, [
-    username,
-    password,
-    firstname,
-    lastname,
-    age,
-  ]);
+  const ageInt = parseInt(age, 10);
+
+  const newUser = await prisma.users.create({
+    data: {
+      username: username,
+      password: password,
+      first_name: firstname,
+      last_name: lastname,
+      age: ageInt,
+    },
+  });
 
   //return result to use in app
-  return result;
+  return newUser;
 };
 
 const makeNewPostLike = async (userId, postId) => {
-  const query = `INSERT INTO post_likes(user_id, post_id)
-  VALUES($1, $2)
-  RETURNING *;`;
+  const userIdInt = parseInt(userId, 10);
+  const postIdInt = parseInt(postId, 10);
+  const newPostLike = await prisma.post_likes.create({
+    data: {
+      user_id: userIdInt,
+      post_id: postIdInt,
+    },
+  });
 
-  const result = await pool.query(query, [userId, postId]);
-
-  return result;
+  return newPostLike;
 };
 
 const checkIfUserLikedPost = async (userId, postId) => {
   try {
-    const query = `SELECT 1 FROM post_likes WHERE user_id = $1 AND post_id = $2;`;
+    const userIdInt = parseInt(userId, 10);
+    const postIdInt = parseInt(postId, 10);
 
-    const result = await pool.query(query, [userId, postId]);
+    const existingLike = await prisma.post_likes.findFirst({
+      where: {
+        user_id: userIdInt,
+        post_id: postIdInt,
+      },
+      select: {
+        id: true,
+      },
+    });
 
-    return result.rows.length > 0;
+    return existingLike ? true : false;
   } catch (error) {
     console.error("Error checking if user like the post", error.message);
     throw error;

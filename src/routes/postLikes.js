@@ -23,17 +23,13 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "User already liked this post." });
     }
 
-    const result = await makeNewPostLike(userId, postId);
-
-    const newLike = result.rows[0];
+    const newLike = await makeNewPostLike(userId, postId);
 
     if (!newLike) {
       return res.status(500).json({ message: "Failed to make new like." });
     }
 
-    res
-      .status(201)
-      .json({ message: "Seccessful new like", newLike: result.rows[0] });
+    res.status(201).json({ message: "Seccessful new like", newLike });
   } catch (error) {
     //log detailed error for debugging
     console.error(

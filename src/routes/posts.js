@@ -22,10 +22,10 @@ router.post("/", async (req, res) => {
 
   try {
     //create varible to handle query from helper function, pass in variable
-    const result = await makeNewPost(userId, content);
+    const newPost = await makeNewPost(userId, content);
 
     //vaiable to handle results
-    const newPost = result.rows[0];
+    // const newPost = result.rows[0];
 
     //if nothing found return message
     if (!newPost) {
@@ -33,9 +33,7 @@ router.post("/", async (req, res) => {
     }
 
     //return ok status and json results
-    res
-      .status(201)
-      .json({ message: "Successful new post", newPost: result.rows[0] });
+    res.status(201).json({ message: "Successful new post", newPost });
   } catch (error) {
     //log detailed error for debugging
     console.error(

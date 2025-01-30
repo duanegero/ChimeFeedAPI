@@ -50,7 +50,7 @@ router.post("/", async (req, res) => {
 
   try {
     //create varible to handle query from helper function, pass in variable
-    const result = await makeNewUser(
+    const newUser = await makeNewUser(
       username,
       password,
       firstname,
@@ -58,18 +58,13 @@ router.post("/", async (req, res) => {
       age
     );
 
-    //vaiable to handle results
-    const newUser = result.rows[0];
-
     //if nothing found return message
     if (!newUser) {
       return res.status(500).json({ message: "Failed to create new user." });
     }
 
     //return ok status and json results
-    res
-      .status(201)
-      .json({ message: "New user created", newUser: result.rows[0] });
+    res.status(201).json({ message: "New user created", newUser });
   } catch (error) {
     //log detailed error for debugging
     console.error(

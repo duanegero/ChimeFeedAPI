@@ -55,10 +55,10 @@ router.post("/", async (req, res) => {
 
   try {
     //create varible to handle query from helper function, pass in variable
-    const result = await makeNewFriendship(userId, selectedUserId);
+    const newFriendship = await makeNewFriendship(userId, selectedUserId);
 
     //vaiable to handle results
-    const newFriendship = result.rows[0];
+    // const newFriendship = result.rows[0];
 
     //if nothing found return message
     if (!newFriendship) {
@@ -68,7 +68,7 @@ router.post("/", async (req, res) => {
     //return ok status and json results
     res.status(201).json({
       message: "Successful friendship",
-      newFriendship: result.rows[0],
+      newFriendship,
     });
   } catch (error) {
     // Log detailed error for debugging
