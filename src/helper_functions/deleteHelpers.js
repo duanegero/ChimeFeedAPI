@@ -3,12 +3,14 @@ const prisma = new PrismaClient();
 
 //defining async function to use in app, with passed in variables
 const deleteUser = async (userId) => {
+  //defining a prisma method
   const userToDelele = await prisma.users.findUnique({
     where: {
       id: userId,
     },
   });
 
+  //if nothing found return error
   if (!userToDelele) {
     throw new Error("User not found");
   }
@@ -27,12 +29,14 @@ const deleteUser = async (userId) => {
     },
   });
 
+  // Delete the related user
   await prisma.users.delete({
     where: {
       id: userId,
     },
   });
 
+  //return to use in app
   return userToDelele;
 };
 
@@ -45,16 +49,17 @@ const deletePost = async (postId) => {
     },
   });
 
+  //return to use in app
   return postToDelete;
 };
 
 //defining async function to use in app, with passed in variables
 const deleteFriendship = async (user_Id1, user_Id2) => {
-  //creating a variable to handle query to database
-
+  //making input a int to use in prsima
   const user1 = parseInt(user_Id1, 10);
   const user2 = parseInt(user_Id2, 10);
 
+  //defining a prisma method to delete frinedship
   const friendshipToDelete = await prisma.friendships.deleteMany({
     where: {
       OR: [
@@ -64,6 +69,7 @@ const deleteFriendship = async (user_Id1, user_Id2) => {
     },
   });
 
+  //return result to use in app
   return friendshipToDelete;
 };
 

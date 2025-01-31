@@ -16,23 +16,21 @@ router.post("/", async (req, res) => {
 
   //if no username or password return error
   if (!username || !password) {
-    return res.status(400).json({ message: "Username and Password required" });
+    return res.status(401).json({ message: "Username and Password required" });
   }
 
   try {
     //create varible to handle query from helper function, pass in variable
-    const result = await checkCredentials(username, password);
+    const checkUser = await checkCredentials(username, password);
 
     //if nothing found return invalid
-    if (result.rows.length === 0) {
+    if (!checkUser) {
       return res.status(401).json({ message: "Invalid Username or Password" });
     }
 
     //assgin returned result to variable
-    const user = result.rows[0];
-
     //create payload
-    const userId = user.id;
+    const userId = checkUser.id;
     console.log(userId);
     const payload = { userID: userId };
 
@@ -40,8 +38,7 @@ router.post("/", async (req, res) => {
     const token = jwt.sign(payload, myKey);
 
     //responsed with token, and user ID
-    res.json({ token, userId });
-    console.log(token, user.id);
+    return res.json({ token, userId });
   } catch (error) {
     // Log the detailed error for debugging
     console.error("Error occurred during login:", error.message, error.stack);

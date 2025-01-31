@@ -1,6 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const pool = require("../db"); //creating varible used to to connect to database
 
 //defining async function to use in app, with passed in variables
 const updateUser = async (

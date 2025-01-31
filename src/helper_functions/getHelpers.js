@@ -1,12 +1,9 @@
-const pool = require("../db"); //creating varible used to connect to database
-
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 //defining async function to use in app, with passed in variables
 const getAllFrinedshipsById = async (userId) => {
-  //creating a variable to handle query to database
-
+  //creating a variable to handle prisma method to database
   const friendships = await prisma.friendships.findMany({
     where: {
       OR: [
@@ -45,33 +42,36 @@ const getAllFrinedshipsById = async (userId) => {
     };
   });
 
+  //return results to use in app
   return friends;
 };
 
 //defining async function to use in app, with passed in variables
 const getUserPosts = async (userId) => {
+  //creating a variable to handle prisma method to database
   const posts = await prisma.posts.findMany({
     where: { user_id: userId },
     orderBy: { created_at: "desc" },
   });
 
+  //return results to use in app
   return posts;
 };
 
 //defining async function to use in app, with passed in variables
 const getUser = async (userId) => {
-  //creating a variable to handle query to database
+  //creating a variable to handle prisma method to database
   const user = await prisma.users.findUnique({
     where: { id: Number(userId) },
   });
 
+  //return results to use in app
   return user;
 };
 
 //defining async function to use in app, with passed in variables
 const getUserFriendsPosts = async (userId) => {
-  //creating a variable to handle query to database
-
+  //creating a variable to handle prisma method to database
   const posts = await prisma.posts.findMany({
     where: {
       OR: [
@@ -109,7 +109,7 @@ const getUserFriendsPosts = async (userId) => {
 
 //defining async function to use in app, with passed in variables
 const getAllNonFriends = async (userId) => {
-  //creating a variable to handle query to database
+  //creating a variable to handle prisma method to database
   const users = await prisma.users.findMany({
     where: {
       NOT: { id: userId }, // Exclude the user with the given `userId`
@@ -132,10 +132,13 @@ const getAllNonFriends = async (userId) => {
     },
   });
 
+  //return results to use in app
   return users;
 };
 
+//defining async function to use in app, with passed in variables
 const getPostLikes = async (postId) => {
+  //creating a variable to handle prisma method to database
   const postLikes = await prisma.post_likes.findMany({
     where: {
       post_id: postId,
@@ -151,6 +154,7 @@ const getPostLikes = async (postId) => {
     },
   });
 
+  //return results to use in app
   return postLikes.map((like) => ({
     username: like.users.username,
     post_id: like.post_id,
