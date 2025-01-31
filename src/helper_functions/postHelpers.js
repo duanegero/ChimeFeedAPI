@@ -21,10 +21,11 @@ const makeNewFriendship = async (userId, selectedUserId) => {
 
 //defining async function to use in app, with passed in variables
 const makeNewPost = async (userId, content) => {
+  const userIdInt = parseInt(userId, 10);
   //creating a variable to handle query to database
   const newPost = await prisma.posts.create({
     data: {
-      user_id: userId,
+      user_id: userIdInt,
       content: content,
     },
   });

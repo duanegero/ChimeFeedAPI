@@ -96,7 +96,7 @@ router.put("/:id", async (req, res) => {
 
   try {
     //create varible to handle query from helper function, pass in variable
-    const result = await updateUser(
+    const updatedUser = await updateUser(
       username,
       password,
       firstname,
@@ -105,18 +105,13 @@ router.put("/:id", async (req, res) => {
       userId
     );
 
-    //vaiable to handle results
-    const updatedUserDetails = result.rows[0];
-
     //if nothing found return message
-    if (!updatedUserDetails) {
+    if (!updatedUser) {
       return res.status(500).json({ message: "Failed to update user." });
     }
 
     //return ok status and json results
-    res
-      .status(200)
-      .json({ message: "Updated user.", updatedUserDetails: result.rows[0] });
+    res.status(200).json({ message: "Updated user.", updatedUser });
   } catch (error) {
     //log detailed error for debugging
     console.error(

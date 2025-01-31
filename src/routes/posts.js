@@ -124,18 +124,15 @@ router.put("/:id", async (req, res) => {
 
   try {
     //create varible to handle query from helper function, pass in variable
-    const result = await updatePost(content, userId);
-
-    //vaiable to handle results
-    const updatedPostDetails = result.rows[0];
+    const updatedPost = await updatePost(content, userId);
 
     //if nothing found return message
-    if (!updatedPostDetails) {
+    if (!updatedPost) {
       return res.status(500).json({ message: "Failed to update post." });
     }
 
     //return ok status and json results
-    res.status(200).json({ message: "Updated post.", updatedPostDetails });
+    res.status(200).json({ message: "Updated post.", updatedPost });
   } catch (error) {
     //log detailed error for debugging
     console.error(

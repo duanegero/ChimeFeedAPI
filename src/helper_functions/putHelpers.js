@@ -1,3 +1,5 @@
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 const pool = require("../db"); //creating varible used to to connect to database
 
 //defining async function to use in app, with passed in variables
@@ -9,40 +11,49 @@ const updateUser = async (
   age,
   userId
 ) => {
-  //creating a variable to handle query to database
-  const query = `UPDATE users
-    SET username = $1, password = $2, first_name = $3, last_name = $4, age = $5
-    WHERE id = $6
-    RETURNING *;`;
+  const userIdInt = parseInt(userId, 10);
 
-  //sending query to database, creating variable for results
-  const result = await pool.query(query, [
-    username,
-    password,
-    firstname,
-    lastname,
-    age,
-    userId,
-  ]);
+  //creating a variable to handle query to database
+
+  const updatedUser = await prisma.users.update({
+    where: { id: userIdInt },
+    data: {
+      username: username,
+      password: password, // Store the hashed password
+      first_name: firstname,
+      last_name: lastname,
+      age: parseInt(age, 10), // Ensure age is an integer
+    },
+  });
 
   //return result to use in app
-  return result;
+  return updatedUser;
 };
 
 //defining async function to use in app, with passed in variables
 const updatePost = async (content, userId) => {
-  //creating a variable to handle query to database
-  const query = `UPDATE posts
-    SET content = $1,
-    created_at = CURRENT_TIMESTAMP
-    WHERE id = $2
-    RETURNING *;`;
+  const postIdInt = parseInt(userId, 10);
 
-  //sending query to database, creating variable for results
-  const result = await pool.query(query, [content, userId]);
+  //creating a variable to handle query to database
+
+  const updatedPost = await prisma.posts.update({
+    where: { id: postIdInt },
+    data: {
+      content: content,
+      created_at: new Date(),
+    },
+  });
+  // const query = `UPDATE posts
+  //   SET content = $1,
+  //   created_at = CURRENT_TIMESTAMP
+  //   WHERE id = $2
+  //   RETURNING *;`;
+
+  // //sending query to database, creating variable for results
+  // const result = await pool.query(query, [content, userId]);
 
   //return result to use in app
-  return result;
+  return updatedPost;
 };
 
 //export function to use else where
