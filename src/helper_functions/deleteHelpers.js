@@ -1,3 +1,4 @@
+//import prisma client to connect to data base
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 

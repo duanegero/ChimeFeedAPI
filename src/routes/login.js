@@ -3,6 +3,7 @@ const router = express.Router(); //creating a router variable to handle the rout
 const jwt = require("jsonwebtoken"); //importing jwt from npm
 require("dotenv").config();
 
+//importing helper function to use in app
 const { checkCredentials } = require("../helper_functions/checkCredentials");
 
 //get key from evn
@@ -29,9 +30,9 @@ router.post("/", async (req, res) => {
     }
 
     //assgin returned result to variable
-    //create payload
     const userId = checkUser.id;
     console.log(userId);
+    //create payload
     const payload = { userID: userId };
 
     //create toke with jwt, payload and key

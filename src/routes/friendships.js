@@ -91,6 +91,7 @@ router.delete("/", async (req, res) => {
   //parsing ID from URL
   const { user_id1, user_id2 } = req.body;
 
+  //if no ids return error
   if (!user_id1 || !user_id2) {
     return res
       .status(400)
@@ -100,6 +101,7 @@ router.delete("/", async (req, res) => {
     //create varible to handle query from helper function, pass in variable
     const friendshipToDelete = await deleteFriendship(user_id1, user_id2);
 
+    //if nothing found alert user
     if (!friendshipToDelete) {
       console.log("Unable to delete frinedship.");
       return;

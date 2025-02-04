@@ -1,3 +1,4 @@
+//require and create a variable for prisma to send requests to database
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
@@ -10,10 +11,10 @@ const updateUser = async (
   age,
   userId
 ) => {
+  //converting passed in ID to int
   const userIdInt = parseInt(userId, 10);
 
   //creating a variable to handle query to database
-
   const updatedUser = await prisma.users.update({
     where: { id: userIdInt },
     data: {
@@ -31,10 +32,10 @@ const updateUser = async (
 
 //defining async function to use in app, with passed in variables
 const updatePost = async (content, userId) => {
+  //converting passed in ID to int
   const postIdInt = parseInt(userId, 10);
 
   //creating a variable to handle query to database
-
   const updatedPost = await prisma.posts.update({
     where: { id: postIdInt },
     data: {
@@ -42,14 +43,6 @@ const updatePost = async (content, userId) => {
       created_at: new Date(),
     },
   });
-  // const query = `UPDATE posts
-  //   SET content = $1,
-  //   created_at = CURRENT_TIMESTAMP
-  //   WHERE id = $2
-  //   RETURNING *;`;
-
-  // //sending query to database, creating variable for results
-  // const result = await pool.query(query, [content, userId]);
 
   //return result to use in app
   return updatedPost;

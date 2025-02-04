@@ -59,6 +59,7 @@ router.get("/:id", async (req, res) => {
     //create varible to handle query from helper function, pass in variable
     const result = await getUserPosts(userId);
 
+    //return success status
     res.status(200).json(result);
   } catch (error) {
     //log detailed error for debugging
@@ -157,6 +158,7 @@ router.delete("/:id", async (req, res) => {
     //create varible to handle query from helper function, pass in variable
     const postToDelete = await deletePost(postId);
 
+    //respond success message and status
     res
       .status(200)
       .json({ message: "Post deleted successfully.", postToDelete });
