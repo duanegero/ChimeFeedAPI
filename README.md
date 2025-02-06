@@ -6,6 +6,7 @@ This restful API is designed to handle requests made from ChimeFeed frontend app
 - [Frontend Repository](#frontend)
 - [API Endpoints](#api-endpoints)
 - [Usage](#usage)
+- [Docker](#docker)
 - [License](#license)
 
 ## Installation
@@ -63,6 +64,21 @@ Once the server is running you can interact with the API through the available e
 ```
 
 The API and Database will add the User ID
+
+## Docker
+
+1. Create Docker Network
+   `docker network create ChimeFeed-Network`
+2. Create Database Container
+   `docker run -d --name ChimeFeed-DB --network ChimeFeed-Network -e POSTGRES_USER=duane -e POSTGRES_PASSWORD=password -e POSTGRES_DB=ChimeFeed -v chimefeed_data:/var/lib/postgresql/data -p 6061:5432 postgres`
+3. Build API Docker Image
+   `docker build -t chime-feed-api .`
+4. Run API Container
+   `docker run -d --name chime-feed-container --network ChimeFeed-Network -p 3004:3004 -e DATABASE_URL="postgresql://duane:password@ChimeFeed-DB:5432/ChimeFeed?schema=public" -e API_KEY=“my_secret_key” chime-feed-api`
+5. Build Frontend Docker Image
+   `docker build -t chime-feed-frontend .`
+6. Run Frontend Container
+   `docker run -d -p 80:80 --name chime-feed-frontend --network ChimeFeed-Network chime-feed-frontend`
 
 ## License
 
